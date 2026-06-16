@@ -1,0 +1,11 @@
+# Build
+**/target/
+*.class
+
+# Lixo de SO / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+nbproject/private/

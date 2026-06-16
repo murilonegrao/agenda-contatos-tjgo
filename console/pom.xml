@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>br.jus.tjgo</groupId>
+    <artifactId>agenda-console</artifactId>
+    <version>0.1.0</version>
+    <packaging>jar</packaging>
+
+    <name>Agenda de Contatos TJGO — Console</name>
+    <description>CRUD de unidades/contatos/telefones/e-mails (Java 17 + JDBC + PostgreSQL)</description>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <exec.mainClass>br.jus.tjgo.agenda.app.MenuConsole</exec.mainClass>
+    </properties>
+
+    <dependencies>
+        <!-- Driver JDBC do PostgreSQL — resolvido automaticamente pelo Maven (RNF01) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.4</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>agenda-console</finalName>
+        <plugins>
+            <!-- Compilador: versão explícita; o default do Maven 3.8.x (3.1) ignora maven.compiler.release -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+
+            <!-- mvn exec:java  -> roda a aplicação direto pelo Maven -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <mainClass>${exec.mainClass}</mainClass>
+                </configuration>
+            </plugin>
+
+            <!-- mvn package -> gera target/agenda-console.jar executável (com o driver embutido) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${exec.mainClass}</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

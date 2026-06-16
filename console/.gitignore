@@ -1,0 +1,3 @@
+target/
+*.class
+# Não versione credenciais reais — db.properties traz só os padrões locais.
