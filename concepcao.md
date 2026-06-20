@@ -1,14 +1,14 @@
 ---
 title: "Concepção — Agenda de Contatos TJGO"
 type: project-doc
-tags: [projeto, pi2a, concepcao, visao, agenda-tjgo]
+tags: [agenda-tjgo, concepcao, visao]
 status: v0.1
 criado: 2026-06-15
-atualizado: 2026-06-15
+atualizado: 2026-06-20
 ---
 
 > [!info] Onde isto se encaixa
-> Etapa de **concepção** (antes dos requisitos): verifica *se o projeto deve acontecer* e fixa problema, ator e fronteira de escopo. Hub em [README](README.md).
+> Etapa de **concepção** (antes dos requisitos): define *por que* o projeto existe e fixa problema, usuário e fronteira de escopo. Visão geral em [README](README.md).
 
 # O problema
 
@@ -20,16 +20,16 @@ Hoje os contatos das **unidades prisionais e órgãos** com que o plantão do TJ
 
 Quando estoura uma urgência no plantão, achar *o telefone certo da unidade certa* depende de sorte e de rolar histórico de WhatsApp.
 
-# O ator
+# Quem usa
 
-> [!note] Ator
-> - **Operador de plantão (console):** servidor do TJGO que faz a manutenção do cadastro (CRUD completo) via menu de texto. É o perfil avaliado na disciplina.
+> [!note] Usuário
+> - **Operador de plantão:** servidor do TJGO que mantém o cadastro (CRUD completo) por um menu de texto. É o único perfil de uso da v0.1.
 
 # A visão
 
 Um **cadastro estruturado** de contatos do plantão, numa aplicação **console Java sobre PostgreSQL**:
 
-- **Console (Java)**: CRUD completo por menu de texto. É a entrega da disciplina (prazo 21/06).
+- **Console (Java)**: CRUD completo por menu de texto.
 
 Regras de domínio:
 
@@ -43,13 +43,12 @@ O valor central: **encontrar rápido o contato certo de uma unidade**, com a inf
 
 > [!danger] Lista OUT — escrita de propósito para evitar scope creep
 > - **Importação** de planilha ou histórico de WhatsApp
-> - Interface gráfica / web / app mobile (a entrega é por menu de console)
+> - Interface gráfica / web / app mobile (a v0.1 é por menu de console)
 > - Relatórios, exportações, dashboards
 > - Auditoria, soft delete, histórico de alterações
 
 # Por que é viável
 
-- Domínio pequeno e conhecido (4 entidades, 1 ator, CRUD).
-- Stack dominada e exigida pela disciplina ([ADR-001-stack](ADR-001-stack.md)).
-- Cabe folgado no prazo (entrega 21/06/2026) como projeto individual.
-- Atende item a item o conteúdo programático: requisitos, casos de uso, BD lógico/físico, DML/CRUD e relacionamento entre tabelas.
+- Domínio pequeno e bem delimitado (4 entidades, 1 usuário, CRUD).
+- Stack simples e madura ([ADR-001-stack](ADR-001-stack.md)).
+- Cobre o essencial de um sistema de cadastro: requisitos, casos de uso, banco lógico/físico, DML/CRUD e relacionamento entre tabelas.

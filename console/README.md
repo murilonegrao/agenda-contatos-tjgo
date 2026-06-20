@@ -1,7 +1,7 @@
 # Agenda de Contatos TJGO — Console (v0.1)
 
 CRUD de **unidades**, **contatos**, **telefones**, **e-mails** e **lotação N:N** do TJGO.
-Java 17 + JDBC puro + PostgreSQL 18, build Maven. Entrega da disciplina **Projeto Integrador II-A** (PUC Goiás).
+Java 17 + JDBC puro + PostgreSQL 18, build Maven.
 
 Arquitetura em camadas (ver `../v0.1-classes.md`):
 

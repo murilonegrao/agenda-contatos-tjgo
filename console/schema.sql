@@ -9,7 +9,7 @@
 --  Ordem: unidade -> contato -> (ALTER FK responsável) -> lotacao -> telefone -> email
 -- ============================================================================
 
--- Reexecução limpa (RNF02 — "dou F5 e não pode dar erro"). CASCADE derruba as FKs.
+-- Reexecução limpa (RNF02 — roda novamente sem erro). CASCADE derruba as FKs.
 DROP TABLE IF EXISTS email    CASCADE;
 DROP TABLE IF EXISTS telefone CASCADE;
 DROP TABLE IF EXISTS lotacao  CASCADE;

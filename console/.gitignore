@@ -1,3 +1,5 @@
 target/
 *.class
+# Gerado pelo maven-shade-plugin no 'mvn package' — não versionar.
+dependency-reduced-pom.xml
 # Não versione credenciais reais — db.properties traz só os padrões locais.

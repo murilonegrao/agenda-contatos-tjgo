@@ -1,59 +1,59 @@
 ---
-title: "Agenda de Contatos TJGO — Hub do Projeto"
+title: "Agenda de Contatos TJGO — Visão Geral"
 type: project-index
-tags: [projeto, pi2a, puc, agenda-tjgo, java, postgresql, hub]
-status: v0.1-requisitos
+tags: [agenda-tjgo, java, postgresql, jdbc, maven, console]
+status: v0.1
 criado: 2026-06-15
-atualizado: 2026-06-16
+atualizado: 2026-06-20
 ---
 
 > [!tip] O que é este projeto
-> Sistema de **cadastro de contatos do TJGO** (unidades prisionais, órgãos e as pessoas ligadas a eles), em uma aplicação **console Java + PostgreSQL**:
-> - **Console** (Java 17 / JDBC / Maven) → entrega da disciplina **Projeto Integrador II-A** (EAD/TADS — PUC Goiás), trabalho **individual**.
+> Um **cadastro de contatos do TJGO** — as unidades prisionais e órgãos com que o plantão precisa falar, e as pessoas ligadas a elas. É uma aplicação de **console em Java 17 sobre PostgreSQL**, com CRUD completo, relacionamento N:N entre unidades e pessoas, e busca por nome.
 >
-> Segue um processo de criação de produto (validação → engenharia → design), com rigor proporcional.
+> Esta é a versão **v0.1**: núcleo de domínio + interface de console.
 
 > [!note] Como executar
-> O passo a passo de execução em máquina limpa (instalar Postgres → criar DB → rodar dump → credenciais → `mvn` → run) está em **[console/README.md](console/README.md)**.
+> O passo a passo completo (instalar PostgreSQL → criar o banco → rodar o `dump.sql` → ajustar credenciais → `mvn` → run) está em **[console/README.md](console/README.md)**. Roda em máquina limpa em ~15 minutos, sem instalar nenhum `.jar` à mão.
 
-# Navegação
+# Documentação
 
-| # | Documento | Responde |
-|---|-----------|----------|
-| 0 | [concepcao](concepcao.md) | Problema, atores, visão, lista OUT |
-| 1 | [v0.1-spec](v0.1-spec.md) | **Console**: user stories, RF/RNF, critérios de aceite, **casos de uso** |
-| 2 | [v0.1-data-model](v0.1-data-model.md) | Modelo conceitual → lógico → físico, **MER**, **DER**, **DDL** (4 entidades + `lotacao` N:N) |
-| 3 | [v0.1-classes](v0.1-classes.md) | **Diagrama de classes** do núcleo `model`/`dao`/`service` + console |
-| 4 | [ADR-001-stack](ADR-001-stack.md) | Stack do núcleo/console (Java/JDBC/Postgres/Maven) |
+| # | Documento | O que responde |
+|---|-----------|----------------|
+| 0 | [concepcao](concepcao.md) | Problema que resolve, quem usa, o que está dentro e fora do escopo |
+| 1 | [v0.1-spec](v0.1-spec.md) | User stories, requisitos (RF/RNF), regras de negócio, critérios de aceite, casos de uso |
+| 2 | [v0.1-data-model](v0.1-data-model.md) | Modelo de dados: conceitual → lógico → físico, MER, DER e o DDL completo |
+| 3 | [v0.1-classes](v0.1-classes.md) | Diagrama de classes do núcleo `model` / `dao` / `service` + console |
+| 4 | [ADR-001-stack](ADR-001-stack.md) | Por que Java / JDBC / PostgreSQL / Maven — a decisão de arquitetura |
 
 # Arquitetura
 
 ```mermaid
 flowchart TB
-    prof([👨‍🏫 Professor]) --> console
+    user([🧑 Operador de plantão]) --> console
     subgraph core["Núcleo Java / Maven — model · dao · service"]
       service["AgendaService"]
     end
-    console["app.MenuConsole<br/>(entrega acadêmica)"]:::face --> service
+    console["app.MenuConsole<br/>(interface de texto)"]:::face --> service
     service --> db[("PostgreSQL 18")]
     classDef face fill:#e8f0ff,stroke:#558
 ```
 
-# Entrega acadêmica (prazo 21/06/2026 23:30)
+A aplicação é organizada em camadas (detalhe em [v0.1-classes](v0.1-classes.md)):
 
-**Nota:** Projeto `[EPP]` = **4,0** + Vídeo `[APP]` = **3,0**.
+- **`model`** — POJOs de domínio (Unidade, Contato, Lotacao, Telefone, Email e enums).
+- **`dao`** — acesso a dados em JDBC puro, com `PreparedStatement`.
+- **`service`** — regras de negócio, busca e tradução de erros, num ponto único.
+- **`app`** — `MenuConsole`, o `main()` e o menu de texto.
 
-- [ ] **Código-fonte Java** — projeto Maven, pacotes `model` / `dao` / `service` / `app`
-- [ ] **Repositório GitHub público** (canal preferido do professor)
-- [ ] **`schema.sql`** (DDL) + **`dump.sql`** (DDL + INSERTs realistas) — rodam de primeira em banco vazio
-- [ ] **README de execução** em máquina limpa (instalar Postgres → criar DB → rodar dump → credenciais → `mvn` → run)
-- [ ] **Vídeo (áudio + tela)** — CRUD completo das entidades, lotação N:N, troca/desvínculo de responsável, múltiplos telefones/e-mails, "explicando pra dev novato"
+# O que a v0.1 entrega
 
-> [!warning] Requisitos não-negociáveis do professor (aulas síncronas)
-> *"Pego seu sistema, rodo, e tem que dar certo. Não pode 'tem que instalar não sei o quê'"* · *"Dou F5 no script e se der erro, complicou"*. → **`dump.sql` roda de primeira**; Maven resolve o driver; README documenta cada dependência (só o PostgreSQL).
+- **Código-fonte Java** — projeto Maven com os pacotes `model` / `dao` / `service` / `app`.
+- **`schema.sql`** (DDL) e **`dump.sql`** (DDL + dados de exemplo) — rodam de primeira em banco vazio.
+- **README de execução** — passo a passo testado em máquina limpa.
+- **CRUD completo** de unidades, contatos, telefones e e-mails; lotação N:N; definir/trocar/remover responsável; busca por nome; tratamento de erros amigável.
 
-# Fases do projeto
+# Status
 
-- **Fase 1 — Escopo/Requisitos** ✅ *(estes documentos)*
-- **Fase 2 — Implementação** ✅ — núcleo + console + `schema.sql`/`dump.sql` + README
-- **Fase 3 — Entrega** ⏳ — repo GitHub público, teste do dump do zero, **roteiro do vídeo**
+- **Requisitos e modelagem** ✅ — documentos desta pasta.
+- **Implementação** ✅ — núcleo + console + `schema.sql`/`dump.sql` + README.
+- **Próximos passos** — possíveis evoluções (outra interface além do console, relatórios) estão fora do escopo da v0.1 (ver [concepcao](concepcao.md)).

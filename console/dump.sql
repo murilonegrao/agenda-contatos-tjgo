@@ -1,7 +1,7 @@
 -- ============================================================================
 --  Agenda de Contatos TJGO — dump.sql (DDL + dados de exemplo)  ·  PostgreSQL 18
 --  AUTOCONTIDO: cria as tabelas e popula com dados realistas do TJGO.
---  Roda de primeira em banco vazio (RNF02 — "dou F5 e não pode dar erro").
+--  Roda de primeira em banco vazio (RNF02 — reprodutível, sem erro).
 --  Idempotente: pode reexecutar (faz DROP das tabelas antes).
 --
 --  Uso:  createdb agenda
