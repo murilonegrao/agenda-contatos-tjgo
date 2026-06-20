@@ -23,8 +23,8 @@ import java.util.List;
  * Camada de regras de negócio (RF08): orquestra os DAOs, valida entradas e
  * traduz {@link SQLException} em {@link AgendaException} com mensagem amigável.
  *
- * <p>É o <b>ponto único de lógica</b> reusado pelo console e (na v0.2) pela API web —
- * por isso a validação mora aqui, não no {@code MenuConsole}.
+ * <p>É o <b>ponto único de lógica</b>: a validação mora aqui, não no {@code MenuConsole}.
+ * Se outra interface for adicionada no futuro, ela reusa esta mesma camada sem duplicar regra.
  */
 public class AgendaService {
 

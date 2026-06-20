@@ -74,27 +74,30 @@ java -jar target/agenda-console.jar
 ## O que dá pra fazer no menu
 
 ```
- 1) Unidades   (CRUD)
- 2) Contatos   (CRUD)
+ 1) Unidades   (CRUD + telefones/e-mails)
+ 2) Contatos   (CRUD + telefones/e-mails)
  3) Lotação    (vincular/desvincular contato ↔ unidade — N:N)
  4) Responsável de unidade (definir/trocar/remover)
- 5) Telefones  (adicionar/listar/remover)
- 6) E-mails    (adicionar/listar/remover)
- 7) Buscar por nome
+ 5) Buscar por nome
  0) Sair
 ```
+
+> **Telefones/e-mails são atributos** da unidade e do contato — não têm menu próprio. Você os adiciona no **Cadastrar** (que exige ≥1 telefone e ≥1 e-mail) e os gerencia (adicionar/remover) dentro do **Editar** da unidade/contato.
+
+> **Consulta sem decorar id:** as opções **Listar** (1/2) e **Buscar** (5) já mostram, de cada unidade/contato, os **telefones, e-mails, responsável e lotação**.
 
 Os dados do `dump.sql` já cobrem os critérios de aceite (`../v0.1-spec.md`):
 
 | Critério | Como conferir no menu |
 |----------|------------------------|
-| **CA03** — unidade contactável com ZERO contatos | Opção 5/6 → listar da unidade **6** (Central de Plantão): tem telefones e e-mails, sem contatos |
-| **CA04** — mesmo contato em 2 unidades | Opção 3 → "unidades do contato" **3** (Mariana): aparece nas unidades 3 e 4 |
-| **CA05** — mesmo contato responsável por 2 unidades | Opção 1 → listar: unidades 3 e 4 têm Mariana como responsável |
-| **CA06** — ≥ 2 telefones e ≥ 2 e-mails | Unidade 6 e contato 3 |
-| **CA07** — arco exclusivo rejeitado | Tente um telefone sem dono → mensagem clara, sem stack trace |
-| **CA08** — busca cruza unidades e contatos | Opção 7 → digite `ar` (volta 2 unidades + 2 contatos numa só busca) |
+| **CA03** — unidade contactável com ZERO contatos | Opção 1 → Listar: **Central de Plantão** tem telefones e e-mails, sem nenhum contato |
+| **CA04** — mesmo contato em 2 unidades | Opção 2 → Listar: **Mariana** aparece "lotado em" as unidades 3 e 4 (ou Opção 3 → unidades do contato 3) |
+| **CA05** — mesmo contato responsável por 2 unidades | Opção 1 → Listar: unidades 3 e 4 têm Mariana como responsável |
+| **CA06** — ≥ 2 telefones e ≥ 2 e-mails | Opção 1/2 → Listar: **Central de Plantão** e a contato **Mariana** têm 2 de cada |
+| **CA07** — arco exclusivo (um dono) | Garantido pelo CHECK do banco + validação no service; o menu sempre amarra exatamente um dono ao telefone/e-mail |
+| **CA08** — busca cruza unidades e contatos | Opção 5 → digite `ar` (volta 2 unidades + 2 contatos numa só busca) |
 | **CA09** — id inexistente | Editar/remover um id que não existe → aviso amigável |
+| **CA10** — cadastro pede telefone e e-mail | Opção 1 ou 2 → **Cadastrar**: ao final exige ≥1 telefone e ≥1 e-mail antes de concluir |
 
 ---
 

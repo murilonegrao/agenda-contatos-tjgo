@@ -12,11 +12,12 @@ import br.jus.tjgo.agenda.service.AgendaService;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
- * Interface de console (RNF05) — a entrega acadêmica. Menu de texto que dirige a
- * {@link AgendaService}. Toda exceção de domínio vira mensagem amigável; o programa
- * não quebra com id inexistente nem violação de regra (CA07, CA09).
+ * Interface de console (RNF05) — menu de texto que dirige a {@link AgendaService}.
+ * Toda exceção de domínio vira mensagem amigável; o programa não quebra com id
+ * inexistente nem violação de regra (CA07, CA09).
  */
 public class MenuConsole {
 
@@ -39,9 +40,7 @@ public class MenuConsole {
                 case "2" -> menuContatos();
                 case "3" -> menuLotacao();
                 case "4" -> menuResponsavel();
-                case "5" -> menuTelefones();
-                case "6" -> menuEmails();
-                case "7" -> buscar();
+                case "5" -> buscar();
                 case "0" -> sair = true;
                 default  -> System.out.println("Opção inválida.");
             }
@@ -53,13 +52,11 @@ public class MenuConsole {
         System.out.println("""
 
                 ---------------- MENU ----------------
-                 1) Unidades   (CRUD)
-                 2) Contatos   (CRUD)
+                 1) Unidades   (CRUD + telefones/e-mails)
+                 2) Contatos   (CRUD + telefones/e-mails)
                  3) Lotação    (vincular/desvincular contato ↔ unidade)
                  4) Responsável de unidade (definir/trocar/remover)
-                 5) Telefones  (adicionar/listar/remover)
-                 6) E-mails    (adicionar/listar/remover)
-                 7) Buscar por nome
+                 5) Buscar por nome
                  0) Sair
                 --------------------------------------""");
     }
@@ -70,7 +67,7 @@ public class MenuConsole {
         System.out.println("""
 
                 --- UNIDADES ---
-                 1) Cadastrar   2) Listar   3) Editar   4) Remover   0) Voltar""");
+                 1) Cadastrar   2) Listar   3) Editar (+ telefones/e-mails)   4) Remover   0) Voltar""");
         switch (lerLinha("Opção: ")) {
             case "1" -> cadastrarUnidade();
             case "2" -> listarUnidades();
@@ -89,6 +86,7 @@ public class MenuConsole {
             u.setEndereco(lerLinha("Endereço (opcional): "));
             int id = service.salvarUnidade(u);
             System.out.println("✔ Unidade cadastrada com id=" + id);
+            exigirTelefonesEmails(id, null);
         });
     }
 
@@ -99,11 +97,7 @@ public class MenuConsole {
                 System.out.println("(nenhuma unidade cadastrada)");
                 return;
             }
-            for (Unidade u : us) {
-                String resp = u.getResponsavelId() == null ? "—"
-                        : nomeContato(u.getResponsavelId());
-                System.out.println(u + "  | responsável: " + resp);
-            }
+            us.forEach(this::imprimirUnidade);
         });
     }
 
@@ -117,6 +111,7 @@ public class MenuConsole {
             u.setEndereco(lerLinhaPadrao("Endereço", u.getEndereco()));
             service.salvarUnidade(u);
             System.out.println("✔ Unidade atualizada.");
+            gerenciarTelefonesEmails(u.getId(), null);
         });
     }
 
@@ -134,7 +129,7 @@ public class MenuConsole {
         System.out.println("""
 
                 --- CONTATOS ---
-                 1) Cadastrar   2) Listar   3) Editar   4) Remover   0) Voltar""");
+                 1) Cadastrar   2) Listar   3) Editar (+ telefones/e-mails)   4) Remover   0) Voltar""");
         switch (lerLinha("Opção: ")) {
             case "1" -> cadastrarContato();
             case "2" -> listarContatos();
@@ -152,6 +147,7 @@ public class MenuConsole {
             ct.setCargo(lerLinha("Cargo (opcional): "));
             int id = service.salvarContato(ct);
             System.out.println("✔ Contato cadastrado com id=" + id);
+            exigirTelefonesEmails(null, id);
         });
     }
 
@@ -162,7 +158,7 @@ public class MenuConsole {
                 System.out.println("(nenhum contato cadastrado)");
                 return;
             }
-            cts.forEach(System.out::println);
+            cts.forEach(this::imprimirContato);
         });
     }
 
@@ -174,6 +170,7 @@ public class MenuConsole {
             ct.setCargo(lerLinhaPadrao("Cargo", ct.getCargo()));
             service.salvarContato(ct);
             System.out.println("✔ Contato atualizado.");
+            gerenciarTelefonesEmails(null, ct.getId());
         });
     }
 
@@ -250,78 +247,70 @@ public class MenuConsole {
         }
     }
 
-    // ============================================================ Telefones
+    // =================================================== Telefones / E-mails (atributos)
 
-    private void menuTelefones() {
-        System.out.println("""
-
-                --- TELEFONES ---
-                 1) Adicionar a unidade   2) Adicionar a contato
-                 3) Listar de unidade     4) Listar de contato
-                 5) Remover por id        0) Voltar""");
-        switch (lerLinha("Opção: ")) {
-            case "1" -> executar(() -> {
-                Telefone t = lerTelefone();
-                t.setUnidadeId(lerInt("Id da unidade dona: "));
-                System.out.println("✔ Telefone id=" + service.addTelefone(t) + " adicionado.");
-            });
-            case "2" -> executar(() -> {
-                Telefone t = lerTelefone();
-                t.setContatoId(lerInt("Id do contato dono: "));
-                System.out.println("✔ Telefone id=" + service.addTelefone(t) + " adicionado.");
-            });
-            case "3" -> executar(() -> {
-                List<Telefone> ts = service.telefonesDaUnidade(lerInt("Id da unidade: "));
-                imprimirOuVazio(ts, "(sem telefones)");
-            });
-            case "4" -> executar(() -> {
-                List<Telefone> ts = service.telefonesDoContato(lerInt("Id do contato: "));
-                imprimirOuVazio(ts, "(sem telefones)");
-            });
-            case "5" -> executar(() -> {
-                service.removerTelefone(lerInt("Id do telefone: "));
-                System.out.println("✔ Telefone removido.");
-            });
-            case "0" -> { /* volta */ }
-            default  -> System.out.println("Opção inválida.");
+    /**
+     * Telefones e e-mails são atributos da unidade/contato — por isso são geridos aqui, dentro do
+     * Editar, e não num menu próprio. Mantém RN09: não deixa remover o último telefone nem o último
+     * e-mail. Exatamente um de {@code unidadeId}/{@code contatoId} vem preenchido (o dono).
+     */
+    private void gerenciarTelefonesEmails(Integer unidadeId, Integer contatoId) {
+        boolean ehUnidade = unidadeId != null;
+        boolean voltar = false;
+        while (!voltar) {
+            List<Telefone> tels = ehUnidade
+                    ? service.telefonesDaUnidade(unidadeId) : service.telefonesDoContato(contatoId);
+            List<Email> emails = ehUnidade
+                    ? service.emailsDaUnidade(unidadeId) : service.emailsDoContato(contatoId);
+            System.out.println("\n--- TELEFONES / E-MAILS ---");
+            System.out.println("  telefones: " + juntar(tels));
+            System.out.println("  e-mails:   " + juntar(emails));
+            System.out.println(" 1) Adicionar telefone   2) Remover telefone");
+            System.out.println(" 3) Adicionar e-mail     4) Remover e-mail");
+            System.out.println(" 0) Voltar");
+            switch (lerLinha("Opção: ")) {
+                case "1" -> tentarAddTelefone(unidadeId, contatoId);
+                case "2" -> removerTelefone(tels);
+                case "3" -> tentarAddEmail(unidadeId, contatoId);
+                case "4" -> removerEmail(emails);
+                case "0" -> voltar = true;
+                default  -> System.out.println("Opção inválida.");
+            }
         }
     }
 
-    // ============================================================ E-mails
-
-    private void menuEmails() {
-        System.out.println("""
-
-                --- E-MAILS ---
-                 1) Adicionar a unidade   2) Adicionar a contato
-                 3) Listar de unidade     4) Listar de contato
-                 5) Remover por id        0) Voltar""");
-        switch (lerLinha("Opção: ")) {
-            case "1" -> executar(() -> {
-                Email e = lerEmail();
-                e.setUnidadeId(lerInt("Id da unidade dona: "));
-                System.out.println("✔ E-mail id=" + service.addEmail(e) + " adicionado.");
-            });
-            case "2" -> executar(() -> {
-                Email e = lerEmail();
-                e.setContatoId(lerInt("Id do contato dono: "));
-                System.out.println("✔ E-mail id=" + service.addEmail(e) + " adicionado.");
-            });
-            case "3" -> executar(() -> {
-                List<Email> es = service.emailsDaUnidade(lerInt("Id da unidade: "));
-                imprimirOuVazio(es, "(sem e-mails)");
-            });
-            case "4" -> executar(() -> {
-                List<Email> es = service.emailsDoContato(lerInt("Id do contato: "));
-                imprimirOuVazio(es, "(sem e-mails)");
-            });
-            case "5" -> executar(() -> {
-                service.removerEmail(lerInt("Id do e-mail: "));
-                System.out.println("✔ E-mail removido.");
-            });
-            case "0" -> { /* volta */ }
-            default  -> System.out.println("Opção inválida.");
+    /** Remove um telefone do cadastro atual, mantendo RN09 (não remove o último). */
+    private void removerTelefone(List<Telefone> atuais) {
+        if (atuais.size() <= 1) {
+            System.out.println("⚠ Não dá pra remover: é o único telefone e todo cadastro precisa de ao menos um (RN09).");
+            return;
         }
+        executar(() -> {
+            int id = lerInt("Id do telefone a remover: ");
+            if (atuais.stream().noneMatch(t -> t.getId() == id)) {
+                System.out.println("⚠ Esse telefone não é deste cadastro. Veja os ids na lista acima.");
+                return;
+            }
+            service.removerTelefone(id);
+            System.out.println("✔ Telefone removido.");
+        });
+    }
+
+    /** Remove um e-mail do cadastro atual, mantendo RN09 (não remove o último). */
+    private void removerEmail(List<Email> atuais) {
+        if (atuais.size() <= 1) {
+            System.out.println("⚠ Não dá pra remover: é o único e-mail e todo cadastro precisa de ao menos um (RN09).");
+            return;
+        }
+        executar(() -> {
+            int id = lerInt("Id do e-mail a remover: ");
+            if (atuais.stream().noneMatch(e -> e.getId() == id)) {
+                System.out.println("⚠ Esse e-mail não é deste cadastro. Veja os ids na lista acima.");
+                return;
+            }
+            service.removerEmail(id);
+            System.out.println("✔ E-mail removido.");
+        });
     }
 
     // ============================================================ Busca
@@ -329,13 +318,21 @@ public class MenuConsole {
     private void buscar() {
         executar(() -> {
             String termo = lerLinha("Termo (nome de unidade ou contato): ");
-            List<ResultadoBusca> r = service.buscarPorNome(termo);
-            if (r.isEmpty()) {
+            List<ResultadoBusca> achados = service.buscarPorNome(termo);
+            if (achados.isEmpty()) {
                 System.out.println("(nada encontrado para \"" + termo + "\")");
                 return;
             }
-            System.out.println(r.size() + " resultado(s):");
-            r.forEach(System.out::println);
+            System.out.println(achados.size() + " resultado(s):");
+            for (ResultadoBusca r : achados) {
+                if ("UNIDADE".equals(r.origem())) {
+                    System.out.println("• UNIDADE");
+                    imprimirUnidade(service.buscarUnidade(r.id()));
+                } else {
+                    System.out.println("• CONTATO");
+                    imprimirContato(service.buscarContato(r.id()));
+                }
+            }
         });
     }
 
@@ -352,9 +349,81 @@ public class MenuConsole {
         }
     }
 
-    private void imprimirOuVazio(List<?> lista, String vazio) {
-        if (lista.isEmpty()) System.out.println(vazio);
-        else lista.forEach(System.out::println);
+    /** Lista a unidade já com responsável, telefones, e-mails e contatos lotados — consulta sem precisar do id. */
+    private void imprimirUnidade(Unidade u) {
+        String resp = u.getResponsavelId() == null ? "—" : nomeContato(u.getResponsavelId());
+        System.out.println(u);
+        System.out.println("    responsável: " + resp);
+        System.out.println("    telefones:   " + juntar(service.telefonesDaUnidade(u.getId())));
+        System.out.println("    e-mails:     " + juntar(service.emailsDaUnidade(u.getId())));
+        System.out.println("    contatos:    " + juntar(service.contatosDaUnidade(u.getId())));
+    }
+
+    /** Lista o contato já com telefones, e-mails e as unidades onde é lotado — consulta sem precisar do id. */
+    private void imprimirContato(Contato ct) {
+        System.out.println(ct);
+        System.out.println("    telefones: " + juntar(service.telefonesDoContato(ct.getId())));
+        System.out.println("    e-mails:   " + juntar(service.emailsDoContato(ct.getId())));
+        System.out.println("    lotado em: " + juntar(service.unidadesDoContato(ct.getId())));
+    }
+
+    /** Junta a lista por vírgula para exibição inline; "(nenhum)" quando vazia. */
+    private String juntar(List<?> itens) {
+        return itens.isEmpty() ? "(nenhum)"
+                : itens.stream().map(Object::toString).collect(Collectors.joining(", "));
+    }
+
+    /**
+     * Logo após criar uma unidade/contato, exige cadastrar pelo menos um telefone E um e-mail
+     * (RN09 — cadastro contactável), permitindo adicionar quantos mais quiser.
+     * Exatamente um dos ids vem preenchido (o dono); o outro é {@code null} — respeita o arco exclusivo.
+     */
+    private void exigirTelefonesEmails(Integer unidadeId, Integer contatoId) {
+        System.out.println("Cadastre ao menos 1 telefone e 1 e-mail (obrigatório).");
+        int tels = 0;
+        while (tels == 0 || confirmar("Adicionar outro telefone? (s/N): ")) {
+            if (tentarAddTelefone(unidadeId, contatoId)) tels++;
+            else if (tels == 0) System.out.println("  Pelo menos um telefone é obrigatório.");
+        }
+        int emails = 0;
+        while (emails == 0 || confirmar("Adicionar outro e-mail? (s/N): ")) {
+            if (tentarAddEmail(unidadeId, contatoId)) emails++;
+            else if (emails == 0) System.out.println("  Pelo menos um e-mail é obrigatório.");
+        }
+    }
+
+    /** Lê e adiciona um telefone do dono indicado; devolve false (com aviso) se a entrada for rejeitada. */
+    private boolean tentarAddTelefone(Integer unidadeId, Integer contatoId) {
+        try {
+            Telefone t = lerTelefone();
+            t.setUnidadeId(unidadeId);
+            t.setContatoId(contatoId);
+            System.out.println("✔ Telefone id=" + service.addTelefone(t) + " adicionado.");
+            return true;
+        } catch (RuntimeException ex) {
+            System.out.println("⚠ " + ex.getMessage());
+            return false;
+        }
+    }
+
+    /** Lê e adiciona um e-mail do dono indicado; devolve false (com aviso) se a entrada for rejeitada. */
+    private boolean tentarAddEmail(Integer unidadeId, Integer contatoId) {
+        try {
+            Email e = lerEmail();
+            e.setUnidadeId(unidadeId);
+            e.setContatoId(contatoId);
+            System.out.println("✔ E-mail id=" + service.addEmail(e) + " adicionado.");
+            return true;
+        } catch (RuntimeException ex) {
+            System.out.println("⚠ " + ex.getMessage());
+            return false;
+        }
+    }
+
+    /** Lê uma confirmação sim/não; só "s"/"sim" (qualquer caixa) confirma. */
+    private boolean confirmar(String prompt) {
+        String s = lerLinha(prompt).toLowerCase();
+        return s.equals("s") || s.equals("sim");
     }
 
     private String nomeContato(int id) {

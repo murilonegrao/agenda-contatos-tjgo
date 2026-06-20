@@ -51,6 +51,7 @@ A aplicação é organizada em camadas (detalhe em [v0.1-classes](v0.1-classes.m
 - **`schema.sql`** (DDL) e **`dump.sql`** (DDL + dados de exemplo) — rodam de primeira em banco vazio.
 - **README de execução** — passo a passo testado em máquina limpa.
 - **CRUD completo** de unidades, contatos, telefones e e-mails; lotação N:N; definir/trocar/remover responsável; busca por nome; tratamento de erros amigável.
+- **Cadastro contactável** — ao criar uma unidade ou contato, o sistema exige ao menos um telefone e um e-mail; as listagens e a busca já exibem telefones, e-mails, responsável e lotação.
 
 # Status
 

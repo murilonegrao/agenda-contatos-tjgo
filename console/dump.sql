@@ -7,7 +7,8 @@
 --  Uso:  createdb agenda
 --        psql -d agenda -f dump.sql
 --
---  Os dados exercitam os critérios de aceite:
+--  Os dados exercitam os critérios de aceite e as regras de negócio:
+--    RN09 — TODA unidade e TODO contato têm >= 1 telefone E >= 1 e-mail (cadastro contactável)
 --    CA03 — "Central de Plantão Judiciário": unidade com telefones/e-mails e ZERO contatos
 --    CA04 — Mariana (contato 3) lotada em DUAS unidades (3 e 4)
 --    CA05 — Mariana (contato 3) responsável por DUAS unidades (3 e 4)
@@ -122,27 +123,41 @@ INSERT INTO lotacao (unidade_id, contato_id, desde) VALUES
   (5, 6, DATE '2023-09-05');   -- Roberto na Casa de Prisão Provisória
 
 -- 5) TELEFONES (RF05). Arco exclusivo: cada linha tem unidade_id OU contato_id.
---    Central de Plantão (unidade 6) tem 2 telefones (CA03/CA06).
+--    RN09: toda unidade e todo contato têm >= 1 telefone.
+--    Central de Plantão (unidade 6) e Mariana (contato 3) têm 2 cada (CA06).
 INSERT INTO telefone (id, numero, tipo, unidade_id, contato_id) VALUES
-  (1, '556232090000',  'PLANTAO',  6, NULL),   -- Central de Plantão (fixo)
-  (2, '5562999990000', 'WHATSAPP', 6, NULL),   -- Central de Plantão (whatsapp)
-  (3, '556232161000',  'FIXO',     1, NULL),   -- TJGO
-  (4, '5562999991111', 'CELULAR',  3, NULL),   -- Presídio de Aparecida
-  (5, '5562999992222', 'CELULAR',  NULL, 3),   -- Mariana (celular)
-  (6, '556232234567',  'FIXO',     NULL, 3),   -- Mariana (fixo) — 2 números (CA06)
-  (7, '5562988887777', 'CELULAR',  NULL, 1),   -- Ana
-  (8, '5562988886666', 'WHATSAPP', NULL, 2);   -- Carlos
+  (1,  '556232090000',  'PLANTAO',  6, NULL),   -- Central de Plantão (fixo)
+  (2,  '5562999990000', 'WHATSAPP', 6, NULL),   -- Central de Plantão (whatsapp)
+  (3,  '556232161000',  'FIXO',     1, NULL),   -- TJGO
+  (4,  '5562999991111', 'CELULAR',  3, NULL),   -- Presídio de Aparecida
+  (9,  '556232180000',  'FIXO',     2, NULL),   -- Vara de Execuções Penais
+  (10, '556232110000',  'PLANTAO',  4, NULL),   -- Complexo Prisional
+  (11, '556232120000',  'FIXO',     5, NULL),   -- Casa de Prisão Provisória
+  (5,  '5562999992222', 'CELULAR',  NULL, 3),   -- Mariana (celular)
+  (6,  '556232234567',  'FIXO',     NULL, 3),   -- Mariana (fixo) — 2 números (CA06)
+  (7,  '5562988887777', 'CELULAR',  NULL, 1),   -- Ana
+  (8,  '5562988886666', 'WHATSAPP', NULL, 2),   -- Carlos
+  (12, '5562988884444', 'CELULAR',  NULL, 4),   -- João Pedro Alves
+  (13, '5562988883333', 'CELULAR',  NULL, 5),   -- Fernanda Gomes
+  (14, '5562988882222', 'CELULAR',  NULL, 6);   -- Roberto Dias
 
--- 6) E-MAILS (RF06). Central de Plantão (unidade 6) e Mariana (contato 3) têm 2 cada (CA06).
+-- 6) E-MAILS (RF06). RN09: toda unidade e todo contato têm >= 1 e-mail.
+--    Central de Plantão (unidade 6) e Mariana (contato 3) têm 2 cada (CA06).
 INSERT INTO email (id, endereco, tipo, unidade_id, contato_id) VALUES
-  (1, 'plantao@tjgo.jus.br',          'institucional', 6, NULL),
-  (2, 'plantao.urgencia@tjgo.jus.br', 'institucional', 6, NULL),
-  (3, 'contato@tjgo.jus.br',          'institucional', 1, NULL),
-  (4, 'presidio.aparecida@dgap.go.gov.br', NULL,       3, NULL),
-  (5, 'mariana.lima@tjgo.jus.br',     'institucional', NULL, 3),
-  (6, 'mariana.castro@gmail.com',     'pessoal',       NULL, 3),
-  (7, 'ana.ribeiro@tjgo.jus.br',      'institucional', NULL, 1),
-  (8, 'carlos.souza@dgap.go.gov.br',  NULL,            NULL, 2);
+  (1,  'plantao@tjgo.jus.br',          'institucional', 6, NULL),
+  (2,  'plantao.urgencia@tjgo.jus.br', 'institucional', 6, NULL),
+  (3,  'contato@tjgo.jus.br',          'institucional', 1, NULL),
+  (4,  'presidio.aparecida@dgap.go.gov.br', NULL,       3, NULL),
+  (9,  'vep@tjgo.jus.br',              'institucional', 2, NULL),   -- Vara de Execuções Penais
+  (10, 'complexo.goiania@dgap.go.gov.br', NULL,         4, NULL),   -- Complexo Prisional
+  (11, 'cpp.goiania@dgap.go.gov.br',   NULL,            5, NULL),   -- Casa de Prisão Provisória
+  (5,  'mariana.lima@tjgo.jus.br',     'institucional', NULL, 3),
+  (6,  'mariana.castro@gmail.com',     'pessoal',       NULL, 3),
+  (7,  'ana.ribeiro@tjgo.jus.br',      'institucional', NULL, 1),
+  (8,  'carlos.souza@dgap.go.gov.br',  NULL,            NULL, 2),
+  (12, 'joao.alves@tjgo.jus.br',       'institucional', NULL, 4),   -- João Pedro Alves
+  (13, 'fernanda.gomes@tjgo.jus.br',   'institucional', NULL, 5),   -- Fernanda Gomes
+  (14, 'roberto.dias@dgap.go.gov.br',  NULL,            NULL, 6);   -- Roberto Dias
 
 -- 7) Reposiciona as sequências SERIAL após inserts com id explícito
 --    (senão o próximo INSERT da aplicação colidiria com ids já usados).
